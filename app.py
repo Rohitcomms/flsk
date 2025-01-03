@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from pytube import YouTube
+from youtube_transcript_api import YouTubeTranscriptApi
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.summarizers.lsa import LsaSummarizer
 
@@ -17,23 +17,15 @@ def summarize_video():
         if not youtube_url:
             return jsonify({"error": "No YouTube URL provided"}), 400
 
-        # Fetch the YouTube video
-        video = YouTube(youtube_url)
+        # Extract video ID
+        video_id = youtube_url.split("v=")[-1]
 
-        # Print available captions languages for debugging
-        available_languages = video.captions.keys()
-        print(f"Available captions languages: {available_languages}")  # Debug print
+        # Fetch the transcript
+        transcript = YouTubeTranscriptApi.get_transcript(video_id)
+        transcript_text = " ".join([item['text'] for item in transcript])
 
-        # Check if English captions are available
-        captions = video.captions.get_by_language_code('en')
-        if not captions:
-            return jsonify({"error": "No English captions available for this video"}), 400
-
-        # Attempt to generate captions in SRT format
-        transcript = captions.generate_srt_captions()
-
-        # Parse the transcript and summarize it
-        parser = PlaintextParser.from_string(transcript, PlaintextParser.URN_MODE)
+        # Summarize the transcript
+        parser = PlaintextParser.from_string(transcript_text, PlaintextParser.URN_MODE)
         summarizer = LsaSummarizer()
         summary = summarizer(parser.document, 3)
 
@@ -41,8 +33,4 @@ def summarize_video():
         summary_text = " ".join(str(sentence) for sentence in summary)
         return jsonify({"summary": summary_text})
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=10000)
+    except 
