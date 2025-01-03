@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify
 from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound
-from youtube_transcript_api.formatters import SRTFormatter
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.summarizers.lsa import LsaSummarizer
 from flask_cors import CORS
@@ -36,13 +35,17 @@ def summarize_video():
             print(f"Available transcripts for video: {available_languages}")  # Debugging step
 
             # Fetch the English transcript if available, otherwise fallback to auto-generated
-            if 'en' not in available_languages:
-                print("No English transcript, trying auto-generated subtitles...")
-                # If English manual subtitles are not available, fetch auto-generated ones
-                transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en', 'en-US'])
-            else:
-                # Fetch the manual English transcript if available
+            transcript = None
+            try:
                 transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en'])
+                print("Fetched manual English subtitles.")
+            except NoTranscriptFound:
+                print("Manual English subtitles not found. Trying auto-generated subtitles...")
+                transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en', 'en-US'])
+
+            if not transcript:
+                return jsonify({"error": "No transcript available in English."}), 400
+
         except TranscriptsDisabled:
             return jsonify({"error": "Subtitles are disabled for this video."}), 400
         except NoTranscriptFound:
