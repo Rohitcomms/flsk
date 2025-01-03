@@ -20,12 +20,16 @@ def summarize_video():
         # Fetch the YouTube video
         video = YouTube(youtube_url)
 
+        # Print available captions languages for debugging
+        available_languages = video.captions.keys()
+        print(f"Available captions languages: {available_languages}")  # Debug print
+
         # Check if English captions are available
         captions = video.captions.get_by_language_code('en')
         if not captions:
             return jsonify({"error": "No English captions available for this video"}), 400
 
-        # Generate the transcript using the available captions
+        # Attempt to generate captions in SRT format
         transcript = captions.generate_srt_captions()
 
         # Parse the transcript and summarize it
