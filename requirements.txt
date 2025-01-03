@@ -1,3 +1,5 @@
 Flask
-pytube
+youtube-transcript-api
 sumy
+nltk
+gunicorn
