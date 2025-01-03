@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, jsonify
 from pytube import YouTube
 from sumy.parsers.plaintext import PlaintextParser
@@ -45,4 +46,5 @@ def summarize():
         return jsonify({'error': 'Failed to process the YouTube URL. Please ensure it is correct.', 'details': str(e)}), 400
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    port = int(os.environ.get("PORT", 5000)) 
+    app.run(host='0.0.0.0', port=port)
