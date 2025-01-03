@@ -1,5 +1,5 @@
-flask
+Flask
 flask-cors
-youtube-transcript-api
+yt-dlp
 sumy
-
+requests
