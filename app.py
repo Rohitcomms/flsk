@@ -1,11 +1,11 @@
 from flask import Flask, request, jsonify
-from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.summarizers.lsa import LsaSummarizer
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all domains (for Streamlit frontend to access the backend)
+CORS(app)  # Enable CORS for all domains
 
 @app.route('/')
 def home():
@@ -14,7 +14,7 @@ def home():
 @app.route('/summarize', methods=['POST'])
 def summarize_video():
     try:
-        # Get JSON data from request
+        # Get JSON data from the request
         data = request.get_json()
         youtube_url = data.get("url")
         if not youtube_url:
@@ -31,6 +31,8 @@ def summarize_video():
         # Fetch the transcript from YouTube
         try:
             transcript = YouTubeTranscriptApi.get_transcript(video_id)
+        except TranscriptsDisabled:
+            return jsonify({"error": "Subtitles are disabled for this video."}), 400
         except Exception as e:
             return jsonify({"error": f"Failed to fetch transcript: {str(e)}"}), 500
 
