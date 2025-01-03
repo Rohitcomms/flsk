@@ -32,7 +32,7 @@ def summarize_video():
         try:
             transcripts = YouTubeTranscriptApi.list_transcripts(video_id)
             available_languages = [transcript.language for transcript in transcripts]
-            print(f"Available transcripts for video: {available_languages}")  # Debugging step
+            print(f"Available transcripts for video ID {video_id}: {available_languages}")
 
             # Fetch the English transcript if available, otherwise fallback to auto-generated
             transcript = None
@@ -56,6 +56,9 @@ def summarize_video():
         # Prepare transcript text for summarization
         transcript_text = " ".join([item['text'] for item in transcript])
 
+        # Debug: Log the transcript text length
+        print(f"Transcript length: {len(transcript_text)} characters")
+
         # Summarize the transcript using LSA summarizer
         parser = PlaintextParser.from_string(transcript_text, PlaintextParser.URN_MODE)
         summarizer = LsaSummarizer()
@@ -64,10 +67,15 @@ def summarize_video():
         # Prepare the summary text
         summary_text = " ".join(str(sentence) for sentence in summary)
 
+        # Debug: Log the generated summary
+        print(f"Generated summary: {summary_text}")
+
         # Return the summary as JSON response
         return jsonify({"summary": summary_text})
 
     except Exception as e:
+        # Debug: Log the exception details
+        print(f"Error: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
