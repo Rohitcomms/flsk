@@ -35,12 +35,14 @@ def summarize_video():
             available_languages = [transcript.language for transcript in transcripts]
             print(f"Available transcripts for video: {available_languages}")  # Debugging step
 
-            # Check if English transcript is available
+            # Fetch the English transcript if available, otherwise fallback to auto-generated
             if 'en' not in available_languages:
-                return jsonify({"error": "No English transcript available for this video."}), 400
-
-            # Fetch the transcript in English if available
-            transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en'])
+                print("No English transcript, trying auto-generated subtitles...")
+                # If English manual subtitles are not available, fetch auto-generated ones
+                transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en', 'en-US'])
+            else:
+                # Fetch the manual English transcript if available
+                transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en'])
         except TranscriptsDisabled:
             return jsonify({"error": "Subtitles are disabled for this video."}), 400
         except NoTranscriptFound:
