@@ -8,20 +8,19 @@ app = Flask(__name__)
 @app.route('/summarize', methods=['POST'])
 def summarize_video():
     try:
-        # Get the YouTube URL from the request data
+      
         data = request.get_json()
         youtube_url = data.get("url")
         if not youtube_url:
             return jsonify({"error": "No YouTube URL provided"}), 400
 
-        # Get the video and extract transcript (simplified, might need additional parsing)
+
         video = YouTube(youtube_url)
         transcript = video.captions.get_by_language_code('en').generate_srt_captions()
-        
-        # Parse the transcript and summarize it
+ 
         parser = PlaintextParser.from_string(transcript, PlaintextParser.URN_MODE)
         summarizer = LsaSummarizer()
-        summary = summarizer(parser.document, 3)  # summarize to 3 sentences
+        summary = summarizer(parser.document, 3) 
 
         summary_text = " ".join(str(sentence) for sentence in summary)
         return jsonify({"summary": summary_text})
